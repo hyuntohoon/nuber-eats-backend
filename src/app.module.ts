@@ -6,13 +6,21 @@ import { RestaurantsModule } from './restaurants/restaurants.module';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ConfigModule } from '@nestjs/config';
 import { Restaruant } from './restaurants/entities/restaruant.entity';
+import { UsersModule } from './users/users.module';
+import { CommonModule } from './common/common.module';
+import { User } from './users/entities/user.entity';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
+      // configMoudle => 각 환경 설정을 돕는 모듈
+      //환경 설정이 왜 필요한가? => 테스트 서버와 실제 배포 서버를 다루는 여러 설정이 같을 수 없고
+      // 이를 분리하여 사용하고자 ConfigModule를 쓴다.
       isGlobal: true,
       envFilePath: process.env.NODE_ENV === 'dev' ? '.env.dev' : '.env.test',
+      //이는 FilePath를 설정하는 것인데, 현제 사용하는 환경이 dev라면 .env.dev사용하고, 아니면 .env.test의 환경설정을 불러온다.
       ignoreEnvFile: process.env.NODE_ENV === 'prod',
+      // 지금 프로세스가 "prod"상태라면 불러오는 것을 무시한다.
       validationSchema: Joi.object({
         NODE_ENV: Joi.string().valid('dev', 'prod').required(),
         DB_HOST: Joi.string().required(),
@@ -21,6 +29,7 @@ import { Restaruant } from './restaurants/entities/restaruant.entity';
         DB_PASSWORD: Joi.string().required(),
         DB_NAME: Joi.string().required(),
       }),
+      //shcema를 검사하는 과정인데, joi를 사용하여, 타입과, 필수인지 아닌지를 설정한다.
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
@@ -34,16 +43,19 @@ import { Restaruant } from './restaurants/entities/restaruant.entity';
       // 개발 시 편의성을 높이지만 실제 shema를 신경쓰지 않고 자바 entity만 신경쓴다면
       // 데이터를 다 날릴 수 있음
       // 그래서 테스트 상황에만 이를 적용할 수 있음
-      logging: true,
-      entities: [Restaruant],
+      logging: process.env.NODE_ENV !== 'prod',
+      entities: [User],
     }),
+    //typeOrm => 백엔드 서버
 
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: true,
     }),
 
-    RestaurantsModule,
+    UsersModule,
+
+    CommonModule,
   ],
   controllers: [],
   providers: [],
