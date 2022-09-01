@@ -21,16 +21,22 @@ export class UsersResolver {
     @Args('input') createAccountInput: CreateAccountInput,
   ): Promise<CreateAccountOutput> {
     try {
-      const [ok, error] = await this.usersService.createAccount(
-        createAccountInput,
-      );
+      return this.usersService.createAccount(createAccountInput);
       // 우리는 error를 throw 하지 않았기 때문에 따로 error가 존재하는지 확인하고 이를 통제한다.
-      return { ok, error };
     } catch (error) {
       return { error, ok: false };
     }
   }
 
   @Mutation((returns) => LoginOuput)
-  async login(@Args('input') loginInput: LoginInput): Promise<LoginOuput> {}
+  async login(@Args('input') loginInput: LoginInput): Promise<LoginOuput> {
+    try {
+      return this.usersService.login(loginInput);
+    } catch (error) {
+      return {
+        ok: false,
+        error,
+      };
+    }
+  }
 }
