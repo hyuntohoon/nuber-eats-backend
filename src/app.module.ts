@@ -9,6 +9,7 @@ import { Restaruant } from './restaurants/entities/restaruant.entity';
 import { UsersModule } from './users/users.module';
 import { CommonModule } from './common/common.module';
 import { User } from './users/entities/user.entity';
+import { JwtModule } from './jwt/jwt.module';
 
 @Module({
   imports: [
@@ -28,6 +29,9 @@ import { User } from './users/entities/user.entity';
         DB_USERNAME: Joi.string().required(),
         DB_PASSWORD: Joi.string().required(),
         DB_NAME: Joi.string().required(),
+        PRIVATE_KEY: Joi.string().required(), // 토큰 지정을 위한 private key, 사용자가 해당 토큰을 수정할 경우 이를 알기위해
+        //env파일에 https://randomkeygen.com/에서 키값을 가져온다.
+        //이렇게 키값을 따로 관리해야 사용자가 가짜 토큰을 보낸 것인지, 확인하여 관리할 수 있다.
       }),
       //shcema를 검사하는 과정인데, joi를 사용하여, 타입과, 필수인지 아닌지를 설정한다.
     }),
@@ -56,6 +60,10 @@ import { User } from './users/entities/user.entity';
     UsersModule,
 
     CommonModule,
+
+    JwtModule.forRoot({
+      privateKey: process.env.PRIVATE_KEY,
+    }),
   ],
   controllers: [],
   providers: [],
