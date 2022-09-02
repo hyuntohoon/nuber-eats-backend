@@ -12,11 +12,9 @@ import { JwtService } from 'src/jwt/jwt.service';
 export class UsersService {
   constructor(
     @InjectRepository(User) private readonly users: Repository<User>,
-    private readonly config: ConfigService, // appMoudule에 import된 config.module에서 작성된 service를 바로 불러올 수 있음 // 이는 nestjs의 injectability 때문이다.
+    //private readonly config: ConfigService, // appMoudule에 import된 config.module에서 작성된 service를 바로 불러올 수 있음 // 이는 nestjs의 injectability 때문이다.
     private readonly jwtService: JwtService,
-  ) {
-    this.jwtService.hello();
-  }
+  ) {}
 
   async createAccount({
     email,
@@ -63,7 +61,7 @@ export class UsersService {
           error: 'Wrong password.',
         };
       }
-      const token = jwt.sign({ id: user.id }, this.config.get('SECRET_KEY')); // 토큰에는 민감한 정보를 주면 안 되며, 식별의 용도에만 쓰여야 한다.
+      const token = this.jwtService.sign(user.id); // 토큰에는 민감한 정보를 주면 안 되며, 식별의 용도에만 쓰여야 한다.
       return {
         ok: true,
         token,
