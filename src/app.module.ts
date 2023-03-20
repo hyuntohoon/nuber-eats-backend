@@ -16,6 +16,7 @@ import { CommonModule } from './common/common.module';
 import { User } from './users/entities/user.entity';
 import { JwtModule } from './jwt/jwt.module';
 import { JwtMiddleware } from './jwt/jwt.middleware';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -61,11 +62,10 @@ import { JwtMiddleware } from './jwt/jwt.middleware';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: true,
+      context: ({ req }) => ({ user: req['user'] }),
     }),
 
     UsersModule,
-
-    CommonModule,
 
     JwtModule.forRoot({
       privateKey: process.env.PRIVATE_KEY,
@@ -77,10 +77,10 @@ import { JwtMiddleware } from './jwt/jwt.middleware';
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(JwtMiddleware).forRoutes({
-      path: '*',
+      path: '/graphql',
       method: RequestMethod.ALL,
     });
-    // 미들웨어 => 라우터 핸들러 전에 호출되는
+    // 미들웨어 => 라우터 핸들러 전에 호출되는 함수이다.
   } // middle ware는 app 모듈에서 설정할 수 있고, main.ts에서 설정할 수 있다.
   // 설정할 때, 어느 경로를 설정할지, POST, GET, DEL... 등 모든 방식에서 설정할 수 있으며,
   // 또한 이를 제한하거나, 추가할 수 있다.
